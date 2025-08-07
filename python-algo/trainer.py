@@ -31,9 +31,6 @@ print_freq = max_ep_len * 4     # print avg reward in the interval (in num times
 log_freq = max_ep_len * 2       # log avg reward in the interval (in num timesteps)
 save_model_freq = int(2e4)      # save model frequency (in num timesteps)
 
-action_std = 0.6
-
-
 #####################################################
 
 
@@ -54,9 +51,10 @@ lr_critic = 0.001       # learning rate for critic network
 random_seed = 0         # set random seed if required (0 = no random seed)
 
 # TODO: set vars
-action_std_decay_rate = 0
-min_action_std = 0
-action_std_decay_freq = 0
+action_std = 0.6
+action_std_decay_rate = 0.05
+min_action_std = 0.1
+action_std_decay_freq = int(2.5e5)
 
 #####################################################
 
@@ -220,6 +218,8 @@ while time_step <= max_training_timesteps:
     time_step += 1
 
 # TODO: logging, implement decay action std or smth
+if has_continuous_action_space and time_step % action_std_decay_freq == 0:
+    ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
 
 print("============================================================================================")
 end_time = datetime.now().replace(microsecond=0)
