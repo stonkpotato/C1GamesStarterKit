@@ -208,17 +208,12 @@ while time_step <= max_training_timesteps:
             ppo_agent.buffer.json_load(j)
     
     print("[DEBUG] Loaded {} states".format(len(ppo_agent.buffer.states)))
-
-    if len(ppo_agent.buffer.states) > 0: # very goofy error
-        ppo_agent.update()
-    else:
-         print("Warning: Buffer is empty, skipping update.")
+    ppo_agent.update()
+    
+    if has_continuous_action_space and time_step % action_std_decay_freq == 0:
+        ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
     
     time_step += 1
-
-# TODO: logging, implement decay action std or smth
-if has_continuous_action_space and time_step % action_std_decay_freq == 0:
-    ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
 
 print("============================================================================================")
 end_time = datetime.now().replace(microsecond=0)
