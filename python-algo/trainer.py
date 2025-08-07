@@ -25,7 +25,7 @@ from ppo import PPO
 has_continuous_action_space = True
 
 max_ep_len = 400                    # max timesteps in one episode
-max_training_timesteps = int(1e5)   # break training loop if timeteps > max_training_timesteps
+max_training_timesteps = 2   # break training loop if timeteps > max_training_timesteps
 
 print_freq = max_ep_len * 4     # print avg reward in the interval (in num timesteps)
 log_freq = max_ep_len * 2       # log avg reward in the interval (in num timesteps)
@@ -193,11 +193,22 @@ while time_step <= max_training_timesteps:
     result = subprocess.run(['python3', 'run_match.py'], cwd='../scripts', capture_output=True)
     print(result.stdout)
 
-    directory = "./PPO_rewards/terminal/"
-    if os.path.exists(directory) and os.listdir(directory):
-        load_path = max([f for f in os.scandir(directory)], key=lambda x: x.stat().st_mtime).name
-        load_dir = directory + load_path
+    directory2 = "./PPO_rewards/terminal/"
+    if os.path.exists(directory2) and os.listdir(directory2):
+        load_path = max([f for f in os.scandir(directory2)], key=lambda x: x.stat().st_mtime).name
+        load_dir = directory2 + load_path
         with open(load_dir, 'r') as f:
+            fr = f.read()
+            print(fr)
+            j = None
+            try:
+                j = json.loads(fr)
+            except:
+                a = fr.split('}')[:-2]
+                a.append("")
+                b = "}".join(a)
+                print(b)
+                j = json.loads(b)
             ppo_agent.buffer.json_load(json.load(f))
     
     print("[DEBUG] Loaded {} states".format(len(ppo_agent.buffer.states)))
@@ -206,6 +217,8 @@ while time_step <= max_training_timesteps:
         ppo_agent.update()
     else:
          print("Warning: Buffer is empty, skipping update.")
+    
+    time_step += 1
 
 # TODO: logging, implement decay action std or smth
 

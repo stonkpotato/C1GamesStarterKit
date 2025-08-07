@@ -163,6 +163,7 @@ class AlgoStrategy(gamelib.AlgoCore):
                     self.model.buffer.is_terminals.append(True)
 
                     directory = "./python-algo/PPO_rewards/"
+                    print(os.path.exists(directory))
                     if not os.path.exists(directory):
                         os.makedirs(directory)
 
@@ -172,7 +173,7 @@ class AlgoStrategy(gamelib.AlgoCore):
 
                     checkpoint_path = directory + "PPO_{}.json".format(self.model_num)
                     with open(checkpoint_path, 'w') as f:
-                        json.dump(self.model.buffer.json_dump(), f)
+                        f.write(json.dumps(self.model.buffer.json_dump()))
 
                     debug_write("Got end state, game over. Stopping algo.")
                     break
