@@ -286,8 +286,8 @@ class AlgoStrategy(gamelib.AlgoCore):
                                 else:
                                     self.prev_reward_calc['invp'] += self.rewards['invalid_placement']
                             else:
-                                if game_state.can_spawn(reference[action[14 * i + j] - 1], (1, j), 1):
-                                    game_state.attempt_spawn(reference[action[14 * i + j] - 1], [(i ,j)], 1)
+                                if game_state.can_spawn(reference[action[14 * i + j] - 1], (i, j), 1):
+                                    game_state.attempt_spawn(reference[action[14 * i + j] - 1], [(i, j)], 1)
                                 else:
                                     self.prev_reward_calc['invp'] += self.rewards['invalid_placement']
                         else:
