@@ -59,7 +59,7 @@ action_std_decay_freq = int(2.5e5)
 #####################################################
 
 # state space dimension
-state_dim = 28*28 + 7
+state_dim = 28*28*3 + 7
 action_dim = 14*28
 
 ###################### logging ######################
@@ -204,7 +204,6 @@ while time_step <= max_training_timesteps:
                 a = fr.split('}')[:-2]
                 a.append("")
                 b = "}".join(a)
-                print(b)
                 j = json.loads(b)
             ppo_agent.buffer.json_load(j)
     

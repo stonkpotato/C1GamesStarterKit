@@ -39,7 +39,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         gamelib.debug_write('Configuring your custom algo strategy...')
 
         self.modelconfig = [
-            28*28 + 7, 
+            28*28*3 + 7, 
             14*28, 
             3e-4, 
             1e-3, 
@@ -197,7 +197,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         game engine.
         """
         game_state = gamelib.GameState(self.config, turn_state)
-        mapped = [[0 for i in range(28)] for i in range(28)]
+        mapped = [0 for i in range(28*28*3)]
         self.equivsp = 0
 
         for i in range(28):
@@ -205,11 +205,13 @@ class AlgoStrategy(gamelib.AlgoCore):
                 if game_state.game_map.in_arena_bounds([i, j]):
                     arr = game_state.game_map.__getitem__([i, j])
                     if len(arr) > 0:
-                        mapped[i][j] = UNIT_TYPE_TO_INDEX[arr[0].unit_type] + 1
-                        if j <= 13:
+                        mapped[3*(28*i+j)] = UNIT_TYPE_TO_INDEX[arr[0].unit_type] + 1
+                        mapped[3*(28*i+j)+1] = arr[0].health
+                        mapped[3*(28*i+j)+2] = 1 if arr[0].upgraded else 0
+                        if arr[0].player_index == 0:
                             self.equivsp += 0.75 * (arr[0].cost[0]) * (arr[0].health / arr[0].max_health)
 
-        inp = torch.cat((torch.reshape(torch.tensor(mapped), (28*28,)), torch.tensor([
+        inp = torch.cat((torch.tensor(mapped), torch.tensor([
             game_state.get_resource(MP, 0),
             game_state.get_resource(SP, 0),
             game_state.my_health,
