@@ -29,7 +29,7 @@ max_training_timesteps = 10   # break training loop if timeteps > max_training_t
 
 print_freq = max_ep_len * 4     # print avg reward in the interval (in num timesteps)
 log_freq = max_ep_len * 2       # log avg reward in the interval (in num timesteps)
-save_model_freq = int(2e4)      # save model frequency (in num timesteps)
+save_model_freq = 10      # save model frequency (in num timesteps)
 
 #####################################################
 
@@ -60,7 +60,7 @@ action_std_decay_freq = int(2.5e5)
 
 # state space dimension
 state_dim = 28*28*3 + 7
-action_dim = 210*2+1
+action_dim = 210*2
 
 ###################### logging ######################
 
@@ -97,6 +97,10 @@ run_num_pretrained = 0      #### change this to prevent overwriting weights in s
 directory = "./PPO_preTrained/"
 if not os.path.exists(directory):
       os.makedirs(directory)
+
+directory3 = './PPO_saves/terminal'
+if not os.path.exists(directory3):
+    os.mkdir(directory3)
 
 #####################################################
 
@@ -174,6 +178,7 @@ time_step = 0
 i_episode = 0
 
 while time_step <= max_training_timesteps:
+
     current_ep_reward = 0
     count = 0
     for path in os.listdir(directory):
@@ -210,6 +215,10 @@ while time_step <= max_training_timesteps:
         # flat_rewards = [reward for sublist in j for reward in (sublist if isinstance(sublist, list) else [sublist])]
         # current_ep_reward = sum(flat_rewards)
     
+    if time_step % save_model_freq == 0:
+        save_directory = directory3 + "PPO_{time_step}.pt"
+        ppo_agent.save(save_directory)
+
     print("[DEBUG] Loaded {} states".format(len(ppo_agent.buffer.states)))
     ppo_agent.update()
     

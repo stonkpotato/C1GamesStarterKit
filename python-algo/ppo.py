@@ -11,6 +11,8 @@ from torch.distributions import Categorical
 
 import numpy as np
 
+from gamelib.util import debug_write
+
 from matplotlib import pyplot as plt
 
 device = torch.device('cpu')
@@ -148,8 +150,12 @@ class ActorCritic(nn.Module):
 
         action = dist.sample()
         # action = torch.round(torch.clamp(action, min=-0.5, max=10.5)).to(dtype=torch.int64)
-        action[0::2] = torch.round(torch.clamp(action[0], min=0, max=10)).to(dtype=torch.int64)
-        action[1::2] = torch.round(torch.clamp(action[1], min=0, max=1)).to(dtype=torch.int64)
+        # might be bugged? check later
+        action1, action2 = torch.split(action, 210, dim=1)
+        action = torch.cat((
+            torch.round(torch.clamp(10*action1, min=-0.5, max=10.5)),
+            torch.clamp(action2, min=0, max=1)
+        ), 1)
         action_logprob = dist.log_prob(action)
         state_val = self.critic(state)
 

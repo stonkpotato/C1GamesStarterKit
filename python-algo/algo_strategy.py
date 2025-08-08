@@ -40,7 +40,7 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         self.modelconfig = [
             28*28*3 + 7, 
-            210*2+1, 
+            210*2, 
             3e-4, 
             1e-3, 
             0.99, 
@@ -239,7 +239,7 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         action = self.model.select_action(inp)
         debug_write(action)
-        self.action_to_strat(action, game_state)
+        self.action_to_strat_bounded(action, game_state)
 
         game_state.submit_turn()
 
@@ -265,6 +265,35 @@ class AlgoStrategy(gamelib.AlgoCore):
             (game_state.get_resource(SP, 0) + self.prev_reward_calc['board_equiv_sp'] - self.equivsp - self.prev_reward_calc['sp'])*self.dim(self.prev_reward_calc['sp'], self.rewards['sp']['a'])*self.rewards['sp']['def'] +
             self.prev_reward_calc['invp']
         )
+
+    def action_to_strat_bounded(self, action, game_state):
+        reference = [WALL, TURRET, SUPPORT, WALL, TURRET, SUPPORT, SCOUT, DEMOLISHER, INTERCEPTOR]
+        mobile_store = []
+        structure_store = []
+        for i in range(14):
+            for j in range(2*i):
+                c = (i, 13 - i + j)
+                if action[i*(i+1) + j] == 10:
+                    if not game_state.contains_stationary_unit(c):
+                        self.prev_reward_calc['invp'] += self.rewards['invalid_placement']
+                    else:
+                        game_state.attempt_remove(c)
+                elif not game_state.contains_stationary_unit(c):
+                    if action[i*(i+1) + j] > 6:
+                        mobile_store.append([action[i*(i+1) + j + 210], c, game_state.type_cost(reference[int(action[i*(i+1) + j]) - 1])[1], action[i*(i+1) + j]])
+                    elif action[i*(i+1) + j] <= 6 and action[i*(i+1) + j] >= 4:
+                        structure_store.append([action[i*(i+1) + j + 210], c, game_state.type_cost(reference[int(action[i*(i+1) + j]) - 1], True)[0] + game_state.type_cost(reference[int(action[i*(i+1) + j]) - 1])[0], action[i*(i+1) + j]])
+                    else:
+                        structure_store.append([action[i*(i+1) + j + 210], c, game_state.type_cost(reference[int(action[i*(i+1) + j]) - 1])[0], action[i*(i+1) + j]])
+                else:
+                    self.prev_reward_calc['invp'] += self.rewards['invalid_placement']
+        mobile_actions = self.fit_to_desired(mobile_store, 0.5*game_state.get_resource(MP, 0), -1)
+        structure_actions = self.fit_to_desired(structure_store, 0.5*game_state.get_resource(SP, 0), 1)
+        for action in mobile_actions + structure_actions:
+            if action[0] > 0:
+                game_state.attempt_spawn(reference[int(action[3]) - 1], [c], action[0])
+                if action[3] <= 6 and action[3] >= 4:
+                    game_state.attempt_upgrade([c])
 
     def action_to_strat(self, action, game_state):
         reference = [WALL, TURRET, SUPPORT, WALL, TURRET, SUPPORT, SCOUT, DEMOLISHER, INTERCEPTOR]
@@ -294,6 +323,39 @@ class AlgoStrategy(gamelib.AlgoCore):
                     else:
                         self.prev_reward_calc['invp'] += self.rewards['invalid_placement']
 
+    def fit_to_desired(self, actions, cost, maximum):
+        multiplier = cost / sum([action[0]*action[2] for action in actions])
+        if maximum > 0:
+            for action in actions:
+                action[0] = max(maximum, action[0]*multiplier)
+            remaining = cost - sum([math.floor(action[0])*action[2] for action in actions])
+            actions.sort(key=lambda a: math.ceil(a[0]) - a[0])
+            index = 0
+            while (index < len(actions)) and (remaining > self.cooked(actions[index])):
+                actions[index][0] = math.ceil(actions[index][0])
+                index += 1
+            for i in range(index, len(actions)):
+                actions[i][0] = math.floor(actions[i][0])
+            return actions
+        else:
+            for action in actions:
+                action[0] *= multiplier
+            remaining = cost - sum([math.floor(action[0])*action[2] for action in actions])
+            actions.sort(key=lambda a: math.ceil(a[0]) - a[0])
+            index = 0
+            while (index < len(actions)) and (remaining > self.cooked(actions[index])):
+                actions[index][0] = math.ceil(actions[index][0])
+                index += 1
+            for i in range(index, len(actions)):
+                actions[i][0] = math.floor(actions[i][0])
+            return actions
+
+    def cooked(self, action):
+        if math.ceil(action[0]) == action[0]:
+            return 0
+        else:
+            return action[2]
+        
     def dim(self, prev, a):
         return a * 2**(-prev/5) + 1
 
