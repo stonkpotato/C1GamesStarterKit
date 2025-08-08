@@ -239,7 +239,6 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         action = self.model.select_action(inp)
         debug_write(action)
-        debug_write(len(action))
         self.action_to_strat(action, game_state)
 
         game_state.submit_turn()

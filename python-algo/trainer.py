@@ -207,8 +207,8 @@ while time_step <= max_training_timesteps:
                 j = json.loads(b)
             ppo_agent.buffer.json_load(j)
 
-        flat_rewards = [reward for sublist in j for reward in (sublist if isinstance(sublist, list) else [sublist])]
-        current_ep_reward = sum(flat_rewards)
+        # flat_rewards = [reward for sublist in j for reward in (sublist if isinstance(sublist, list) else [sublist])]
+        # current_ep_reward = sum(flat_rewards)
     
     print("[DEBUG] Loaded {} states".format(len(ppo_agent.buffer.states)))
     ppo_agent.update()
@@ -216,16 +216,16 @@ while time_step <= max_training_timesteps:
     if has_continuous_action_space and time_step % action_std_decay_freq == 0:
         ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
 
-    if time_step % print_freq == 0:
-        print_avg_reward = print_running_reward / print_running_episodes
-        print_avg_reward = round(print_avg_reward, 2)
+    # if time_step % print_freq == 0:
+    #     print_avg_reward = print_running_reward / print_running_episodes
+    #     print_avg_reward = round(print_avg_reward, 2)
 
-        print(f"Episode {i_episode} \t\t Timestep: {time_step} \t\t Average Reward: {print_avg_reward}")
-        print_running_reward = 0
-        print_running_episodes = 0
+    #     print(f"Episode {i_episode} \t\t Timestep: {time_step} \t\t Average Reward: {print_avg_reward}")
+    #     print_running_reward = 0
+    #     print_running_episodes = 0
     
     time_step += 1
-    print_running_reward += current_ep_reward
+    # print_running_reward += current_ep_reward
 
 print("============================================================================================")
 end_time = datetime.now().replace(microsecond=0)
