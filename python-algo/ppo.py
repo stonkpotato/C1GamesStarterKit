@@ -147,7 +147,9 @@ class ActorCritic(nn.Module):
             dist = Categorical(action_probs)
 
         action = dist.sample()
-        action = torch.round(torch.clamp(action, min=-0.5, max=10.5)).to(dtype=torch.int64)
+        # action = torch.round(torch.clamp(action, min=-0.5, max=10.5)).to(dtype=torch.int64)
+        action[0::2] = torch.round(torch.clamp(action[0], min=0, max=10)).to(dtype=torch.int64)
+        action[1::2] = torch.round(torch.clamp(action[1], min=0, max=1)).to(dtype=torch.int64)
         action_logprob = dist.log_prob(action)
         state_val = self.critic(state)
 
