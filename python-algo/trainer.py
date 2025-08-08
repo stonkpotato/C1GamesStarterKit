@@ -25,7 +25,7 @@ from ppo import PPO
 has_continuous_action_space = True
 
 max_ep_len = 400                    # max timesteps in one episode
-max_training_timesteps = 10   # break training loop if timeteps > max_training_timesteps
+max_training_timesteps = 50   # break training loop if timeteps > max_training_timesteps
 
 print_freq = max_ep_len * 4     # print avg reward in the interval (in num timesteps)
 log_freq = max_ep_len * 2       # log avg reward in the interval (in num timesteps)
@@ -96,11 +96,11 @@ run_num_pretrained = 0      #### change this to prevent overwriting weights in s
 
 directory = "./PPO_preTrained/"
 if not os.path.exists(directory):
-      os.makedirs(directory)
+    os.makedirs(directory)
 
-directory3 = './PPO_saves/terminal'
+directory3 = './PPO_saves/terminal/'
 if not os.path.exists(directory3):
-    os.mkdir(directory3)
+    os.makedirs(directory3)
 
 #####################################################
 
@@ -177,6 +177,9 @@ log_running_episodes = 0
 time_step = 0
 i_episode = 0
 
+basic = True
+storage = []
+
 while time_step <= max_training_timesteps:
 
     current_ep_reward = 0
@@ -193,35 +196,59 @@ while time_step <= max_training_timesteps:
     print("Elapsed Time  : ", datetime.now().replace(microsecond=0) - start_time)
     print("--------------------------------------------------------------------------------------------")
 
-    result = subprocess.run(['python3', 'run_match.py'], cwd='../scripts', capture_output=True, text=True)
+    result = None
+    if basic:
+        result = subprocess.run(['python3', 'run_match_basic.py'], cwd='../scripts', capture_output=True, text=True)
+    else:
+        result = subprocess.run(['python3', 'run_match.py'], cwd='../scripts', capture_output=True, text=True)
     print(result.stdout)
+    winner = result.stdout.split('Winner (p1 perspective, 1 = p1 2 = p2):')[1][1]
+    storage.append(2 - winner)
+    if basic and sum(storage[-20:]) >= 14:
+        basic = False
+
+    print(storage[-20:], basic)
 
     directory2 = "./PPO_rewards/terminal/"
     if os.path.exists(directory2) and os.listdir(directory2):
-        load_path = max([f for f in os.scandir(directory2)], key=lambda x: x.stat().st_mtime).name
-        load_dir = directory2 + load_path
-        with open(load_dir, 'r') as f:
-            fr = f.read()
-            j = None
-            try:
-                j = json.loads(fr)
-            except:
-                a = fr.split('}')[:-2]
-                a.append("")
-                b = "}".join(a)
-                j = json.loads(b)
-            ppo_agent.buffer.json_load(j)
+        if basic:
+            load_path = max([f for f in os.scandir(directory2)], key=lambda x: x.stat().st_mtime).name
+            load_dir = directory2 + load_path
+            with open(load_dir, 'r') as f:
+                ppo_agent.buffer.json_load(json.loads(f.read()))
 
-        # flat_rewards = [reward for sublist in j for reward in (sublist if isinstance(sublist, list) else [sublist])]
-        flat_rewards = [reward for reward in j["rewards"]]
-        current_ep_reward = sum(flat_rewards)
+            # flat_rewards = [reward for sublist in j for reward in (sublist if isinstance(sublist, list) else [sublist])]
+            current_ep_reward += sum([reward for reward in ppo_agent.buffer.rewards])
+
+            print("[DEBUG] Loaded {} states".format(len(ppo_agent.buffer.states)))
+            ppo_agent.update()
+        else:
+            load_path1, load_path2 = map(lambda file: file.name, sorted([f for f in os.scandir(directory2)], key=lambda x: x.stat().st_mtime)[-2:])
+            load_dir = directory2 + load_path1
+            with open(load_dir, 'r') as f:
+                ppo_agent.buffer.json_load(json.loads(f.read()))
+
+            # flat_rewards = [reward for sublist in j for reward in (sublist if isinstance(sublist, list) else [sublist])]
+            current_ep_reward += sum([reward for reward in ppo_agent.buffer.rewards])
+
+            print("[DEBUG] Loaded {} states".format(len(ppo_agent.buffer.states)))
+            ppo_agent.update()
+
+            load_dir2 = directory2 + load_path2
+            with open(load_dir2, 'r') as f:
+                ppo_agent.buffer.json_load(json.loads(f.read()))
+
+            # flat_rewards = [reward for sublist in j for reward in (sublist if isinstance(sublist, list) else [sublist])]
+            current_ep_reward += sum([reward for reward in ppo_agent.buffer.rewards])
+
+            print("[DEBUG] Loaded {} states".format(len(ppo_agent.buffer.states)))
+            ppo_agent.update()
+
+    print("AVERAGE REWARD: {}".format(current_ep_reward / 100 if basic else current_ep_reward / 200))
     
     if time_step % save_model_freq == 0:
-        save_directory = directory3 + "PPO_{time_step}.pt"
+        save_directory = directory3 + "PPO_{}.pt".format(time_step)
         ppo_agent.save(save_directory)
-
-    print("[DEBUG] Loaded {} states".format(len(ppo_agent.buffer.states)))
-    ppo_agent.update()
     
     if has_continuous_action_space and time_step % action_std_decay_freq == 0:
         ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)

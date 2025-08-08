@@ -28,9 +28,9 @@ Advanced strategy tips:
 class AlgoStrategy(gamelib.AlgoCore):
     def __init__(self):
         super().__init__()
-        seed = random.randrange(maxsize)
-        random.seed(seed)
-        gamelib.debug_write('Random seed: {}'.format(seed))
+        self.seed = random.randrange(maxsize)
+        random.seed(self.seed)
+        gamelib.debug_write('Random seed: {}'.format(self.seed))
 
     def on_game_start(self, config):
         """ 
@@ -66,7 +66,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         }
 
         self.model = PPO(*self.modelconfig)
-        self.model_num = 0
 
         self.action_std_decay_rate = 0
         self.min_action_std = 0
@@ -86,9 +85,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         if os.path.exists(directory):
             debug_write(self.newest(directory))
             self.model.load(self.newest(directory))
-            self.model_num = len(os.listdir(directory))
-        else:
-            debug_write('kms why loading no work')
 
         self.config = config
         global WALL, SUPPORT, TURRET, SCOUT, DEMOLISHER, INTERCEPTOR, MP, SP, UNIT_TYPE_TO_INDEX
@@ -171,10 +167,11 @@ class AlgoStrategy(gamelib.AlgoCore):
                     if not os.path.exists(directory):
                         os.makedirs(directory)
 
-                    checkpoint_path = directory + "PPO_{}.json".format(self.model_num)
+                    checkpoint_path = directory + "PPO_{}.json".format(self.seed)
                     with open(checkpoint_path, 'w') as f:
                         f.write(json.dumps(self.model.buffer.json_dump()))
 
+                    debug_write('PLAYERIDENTIFIER{}PLAYERIDENTIFIER'.format(self.seed))
                     debug_write("Got end state, game over. Stopping algo.")
                     break
                 else:
@@ -238,7 +235,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         }
 
         action = self.model.select_action(inp)
-        debug_write(action)
         self.action_to_strat_bounded(action, game_state)
 
         game_state.submit_turn()
