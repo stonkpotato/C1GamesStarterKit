@@ -60,7 +60,7 @@ action_std_decay_freq = int(2.5e5)
 
 # state space dimension
 state_dim = 28*28*3 + 7
-action_dim = 14*28
+action_dim = 210*2+1
 
 ###################### logging ######################
 

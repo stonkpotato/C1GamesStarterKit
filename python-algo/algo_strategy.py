@@ -40,7 +40,7 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         self.modelconfig = [
             28*28*3 + 7, 
-            14*28, 
+            210*2+1, 
             3e-4, 
             1e-3, 
             0.99, 
