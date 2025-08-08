@@ -213,7 +213,8 @@ while time_step <= max_training_timesteps:
             ppo_agent.buffer.json_load(j)
 
         # flat_rewards = [reward for sublist in j for reward in (sublist if isinstance(sublist, list) else [sublist])]
-        # current_ep_reward = sum(flat_rewards)
+        flat_rewards = [reward for reward in j["rewards"]]
+        current_ep_reward = sum(flat_rewards)
     
     if time_step % save_model_freq == 0:
         save_directory = directory3 + "PPO_{time_step}.pt"
