@@ -16,6 +16,14 @@ from matplotlib import pyplot as plt
 
 from ppo import PPO
 
+def newest(path):
+    files = os.listdir(path)
+    paths = [] 
+    for file in files:
+        if os.path.isfile(os.path.join(path, file)):
+            paths.append(os.path.join(path, file))
+    return max(paths, key=os.path.getctime)
+
 ################################### Training ###################################
 
 
@@ -25,11 +33,11 @@ from ppo import PPO
 has_continuous_action_space = True
 
 max_ep_len = 400                    # max timesteps in one episode
-max_training_timesteps = 50   # break training loop if timeteps > max_training_timesteps
+max_training_timesteps = 500   # break training loop if timeteps > max_training_timesteps
 
 print_freq = max_ep_len * 4     # print avg reward in the interval (in num timesteps)
 log_freq = max_ep_len * 2       # log avg reward in the interval (in num timesteps)
-save_model_freq = 10      # save model frequency (in num timesteps)
+save_model_freq = 50      # save model frequency (in num timesteps)
 
 #####################################################
 
@@ -45,8 +53,8 @@ K_epochs = 40               # update policy for K epochs
 eps_clip = 0.2              # clip parameter for PPO
 gamma = 0.99                # discount factor
 
-lr_actor = 0.0003       # learning rate for actor network
-lr_critic = 0.001       # learning rate for critic network
+lr_actor = 0.003       # learning rate for actor network
+lr_critic = 0.01       # learning rate for critic network
 
 random_seed = 0         # set random seed if required (0 = no random seed)
 
@@ -177,6 +185,11 @@ log_running_episodes = 0
 time_step = 0
 i_episode = 0
 
+if os.path.isdir('./PPO_saves/terminal') and os.listdir('./PPO_saves/terminal'):
+    nam = newest('./PPO_saves/terminal')
+    ppo_agent.load(nam)
+    time_step = int(nam[-5:-3])
+
 basic = True
 storage = []
 
@@ -203,7 +216,7 @@ while time_step <= max_training_timesteps:
         result = subprocess.run(['python3', 'run_match.py'], cwd='../scripts', capture_output=True, text=True)
     print(result.stdout)
     winner = result.stdout.split('Winner (p1 perspective, 1 = p1 2 = p2):')[1][1]
-    storage.append(2 - winner)
+    storage.append(2 - int(winner))
     if basic and sum(storage[-20:]) >= 14:
         basic = False
 
@@ -268,5 +281,6 @@ print("=========================================================================
 end_time = datetime.now().replace(microsecond=0)
 print("Started training at (GMT) : ", start_time)
 print("Finished training at (GMT) : ", end_time)
+print(storage)
 print("Total training time  : ", end_time - start_time)
 print("============================================================================================")

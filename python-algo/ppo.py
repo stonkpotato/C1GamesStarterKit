@@ -46,12 +46,12 @@ class RolloutBuffer:
         }
     
     def json_load(self, loaded):
-        self.actions = [torch.tensor(a, dtype=torch.float32) for a in loaded['actions']]
-        self.states = [torch.tensor(s, dtype=torch.float32) for s in loaded['states']]
-        self.logprobs = [torch.tensor(lp, dtype=torch.float32) for lp in loaded['logprobs']]
-        self.rewards = loaded['rewards']
-        self.state_values = [torch.tensor(sv, dtype=torch.float32) for sv in loaded['state_values']]
-        self.is_terminals = loaded['is_terminals']
+        self.actions = self.actions + [torch.tensor(a, dtype=torch.float32) for a in loaded['actions']]
+        self.states = self.states + [torch.tensor(s, dtype=torch.float32) for s in loaded['states']]
+        self.logprobs = self.logprobs + [torch.tensor(lp, dtype=torch.float32) for lp in loaded['logprobs']]
+        self.rewards = self.rewards + loaded['rewards']
+        self.state_values = self.state_values + [torch.tensor(sv, dtype=torch.float32) for sv in loaded['state_values']]
+        self.is_terminals = self.is_terminals + loaded['is_terminals']
 
 class ActorCritic(nn.Module):
     def __init__(self, state_dim, action_dim, has_continuous_action_space, action_std_init):

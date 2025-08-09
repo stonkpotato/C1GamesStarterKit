@@ -228,9 +228,9 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.prev_reward_calc = {
             'health': game_state.my_health,
             'ehealth': game_state.enemy_health,
-            'mp': game_state.get_resource(MP, 0),
-            'sp': game_state.get_resource(SP, 0),
-            'board_equiv_sp': self.equivsp,
+            # 'mp': game_state.get_resource(MP, 0),
+            # 'sp': game_state.get_resource(SP, 0),
+            # 'board_equiv_sp': self.equivsp,
             'invp': 0
         }
 
@@ -254,11 +254,14 @@ class AlgoStrategy(gamelib.AlgoCore):
         return max(paths, key=os.path.getctime)
 
     def reward(self, game_state):
+        # debug_write(game_state.my_health - self.prev_reward_calc['health'])
+        # debug_write(self.prev_reward_calc['ehealth'] - game_state.enemy_health)
+        # debug_write(game_state.get_resource(MP, 0) - self.prev_reward_calc['mp'])
+        # debug_write(game_state.get_resource(SP, 0) + self.prev_reward_calc['board_equiv_sp'] - self.equivsp - self.prev_reward_calc['sp'])
+        # debug_write(self.prev_reward_calc['invp'])
         return (
             (game_state.my_health - self.prev_reward_calc['health'])*self.dim(self.prev_reward_calc['health'], self.rewards['health']['a'])*self.rewards['health']['def'] +
             (self.prev_reward_calc['ehealth'] - game_state.enemy_health)*self.dim(self.prev_reward_calc['ehealth'], self.rewards['health']['a'])*self.rewards['health']['def'] +
-            (game_state.get_resource(MP, 0) - self.prev_reward_calc['mp'])*self.dim(self.prev_reward_calc['mp'], self.rewards['mp']['a'])*self.rewards['mp']['def'] + 
-            (game_state.get_resource(SP, 0) + self.prev_reward_calc['board_equiv_sp'] - self.equivsp - self.prev_reward_calc['sp'])*self.dim(self.prev_reward_calc['sp'], self.rewards['sp']['a'])*self.rewards['sp']['def'] +
             self.prev_reward_calc['invp']
         )
 
