@@ -66,7 +66,7 @@ class ActorCritic(nn.Module):
         # actor
         if has_continuous_action_space :
             self.actor = nn.Sequential(
-                            nn.Linear(state_dim, 64),
+                            nn.Linear(state_dim, 512),
                             nn.Tanh(),
                             nn.Linear(512, 512),
                             nn.Tanh(),
