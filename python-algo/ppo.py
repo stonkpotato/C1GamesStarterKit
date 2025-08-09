@@ -68,30 +68,21 @@ class ActorCritic(nn.Module):
             self.actor = nn.Sequential(
                             nn.Linear(state_dim, 64),
                             nn.Tanh(),
-                            nn.Linear(64, 64),
+                            nn.Linear(512, 512),
                             nn.Tanh(),
-                            nn.Linear(64, action_dim)
+                            nn.Linear(512, 256),
+                            nn.Tanh(),
+                            nn.Linear(256, action_dim)
                         )
-            # self.actor = nn.Sequential(
-            #     nn.Conv2d(in_channels=2, out_channels=8, kernel_size=3, padding=1),
-            #     nn.LeakyReLU(inplace=True), # leaky relu better type shi
-            #     nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, padding=1),
-            #     nn.LeakyReLU(inplace=True),
-            #     nn.Flatten(),
-            #     nn.Linear(16 * 28 * 28 + 7, 32), # TODO: follow up on this
-            #     nn.ReLU(inplace=True),
-            #     nn.Linear(32, 16),
-            #     nn.ReLU(inplace=True),
-            #     nn.Linear(16, action_dim),
-            #     nn.Tanh()
-            # )
         else:
             self.actor = nn.Sequential(
                             nn.Linear(state_dim, 64),
                             nn.Tanh(),
-                            nn.Linear(64, 64),
+                            nn.Linear(512, 612),
                             nn.Tanh(),
-                            nn.Linear(64, action_dim),
+                            nn.Linear(512, 256),
+                            nn.Tanh(),
+                            nn.Linear(256, action_dim),
                             nn.Softmax(dim=-1)
                         )
 
@@ -104,20 +95,7 @@ class ActorCritic(nn.Module):
                         nn.Tanh(),
                         nn.Linear(64, 1)
                     )
-
-        # self.critic = nn.Sequential(
-        #     nn.Conv2d(in_channels=2, out_channels=8, kernel_size=3, padding=1),
-        #     nn.LeakyReLU(inplace=True),
-        #     nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, padding=1),
-        #     nn.LeakyReLU(inplace=True),
-        #     nn.Flatten(),
-        #     nn.Linear(28 * 28 * 16 + 7, 32), # TODO: follow up on this
-        #     nn.ReLU(inplace=True),
-        #     nn.Linear(32, 16),
-        #     nn.ReLU(inplace=True),
-        #     nn.Linear(16, 1)
-        # )
-        
+                
     def set_action_std(self, new_action_std):
 
         if self.has_continuous_action_space:
