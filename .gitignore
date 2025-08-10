@@ -10,3 +10,4 @@ dist/*
 myenv/
 *.zip
 */.idea/*
+python-algo/PPO_logs/terminal/PPO_5.json
