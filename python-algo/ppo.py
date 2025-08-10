@@ -65,15 +65,22 @@ class ActorCritic(nn.Module):
 
         # actor
         if has_continuous_action_space :
+            # self.actor = nn.Sequential(
+            #                 nn.Linear(state_dim, 512),
+            #                 nn.Tanh(),
+            #                 nn.Linear(512, 512),
+            #                 nn.Tanh(),
+            #                 nn.Linear(512, 256),
+            #                 nn.Tanh(),
+            #                 nn.Linear(256, action_dim)
+            #             )
             self.actor = nn.Sequential(
-                            nn.Linear(state_dim, 512),
-                            nn.Tanh(),
-                            nn.Linear(512, 512),
-                            nn.Tanh(),
-                            nn.Linear(512, 256),
-                            nn.Tanh(),
-                            nn.Linear(256, action_dim)
-                        )
+                nn.Linear(state_dim, 64),
+                nn.Tanh(),
+                nn.Linear(64, 64),
+                nn.Tanh(),
+                nn.Linear(64, action_dim)
+            )
         else:
             self.actor = nn.Sequential(
                             nn.Linear(state_dim, 512),
@@ -88,15 +95,23 @@ class ActorCritic(nn.Module):
 
         
         # critic
+        # self.critic = nn.Sequential(
+        #                 nn.Linear(state_dim, 512),
+        #                 nn.Tanh(),
+        #                 nn.Linear(512, 512),
+        #                 nn.Tanh(),
+        #                 nn.Linear(512, 256),
+        #                 nn.Tanh(),
+        #                 nn.Linear(256, 1)
+        #             )
+
         self.critic = nn.Sequential(
-                        nn.Linear(state_dim, 512),
-                        nn.Tanh(),
-                        nn.Linear(512, 512),
-                        nn.Tanh(),
-                        nn.Linear(512, 256),
-                        nn.Tanh(),
-                        nn.Linear(256, 1)
-                    )
+            nn.Linear(state_dim, 64),
+            nn.Tanh(),
+            nn.Linear(64, 64),
+            nn.Tanh(),
+            nn.Linear(64, 1)
+        )
                 
     def set_action_std(self, new_action_std):
 
