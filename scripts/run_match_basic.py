@@ -27,8 +27,8 @@ print("Is windows: {}".format(is_windows))
 
 # Set default path for algos if script is run with no params
 default_algo = parent_dir + "\\python-algo\\run.ps1" if is_windows else parent_dir + "/python-algo/run.sh"
-algo1 = parent_dir + "/python-algo/run.sh"
-algo2 = parent_dir + "/python-algo/run_basic.sh"
+algo1 = parent_dir + "\\python-algo\\run.ps1"
+algo2 = parent_dir + "\\python-algo\\run_basic.ps1"
 
 checkpoint_path = ""
 if len(sys.argv) > 1:
