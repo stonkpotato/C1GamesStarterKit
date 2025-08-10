@@ -72,15 +72,11 @@ class ActorCritic(nn.Module):
                             nn.Tanh(),
                             nn.Linear(512, 256),
                             nn.Tanh(),
-<<<<<<< HEAD
-                            nn.Linear(256, action_dim)
-=======
                             nn.Linear(256, 128),
                             nn.Tanh(),
                             nn.Linear(128, 64),
                             nn.Tanh(),
                             nn.Linear(64, action_dim)
->>>>>>> 11a9c4607c7e1a1406c93b7af0d3f4413d75b5c5
                         )
             # self.actor = nn.Sequential(
             #     nn.Linear(state_dim, 64),
