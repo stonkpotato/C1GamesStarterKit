@@ -230,6 +230,7 @@ while time_step <= max_training_timesteps:
             with open(load_dir, 'r') as f:
                 ppo_agent.buffer.json_load(json.loads(f.read()))
 
+            print(ppo_agent.buffer.rewards)
             # flat_rewards = [reward for sublist in j for reward in (sublist if isinstance(sublist, list) else [sublist])]
             current_ep_reward += sum([reward for reward in ppo_agent.buffer.rewards])
 

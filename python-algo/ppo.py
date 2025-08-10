@@ -65,22 +65,22 @@ class ActorCritic(nn.Module):
 
         # actor
         if has_continuous_action_space :
-            # self.actor = nn.Sequential(
-            #                 nn.Linear(state_dim, 512),
-            #                 nn.Tanh(),
-            #                 nn.Linear(512, 512),
-            #                 nn.Tanh(),
-            #                 nn.Linear(512, 256),
-            #                 nn.Tanh(),
-            #                 nn.Linear(256, action_dim)
-            #             )
             self.actor = nn.Sequential(
-                nn.Linear(state_dim, 64),
-                nn.Tanh(),
-                nn.Linear(64, 64),
-                nn.Tanh(),
-                nn.Linear(64, action_dim)
-            )
+                            nn.Linear(state_dim, 512),
+                            nn.Tanh(),
+                            nn.Linear(512, 512),
+                            nn.Tanh(),
+                            nn.Linear(512, 256),
+                            nn.Tanh(),
+                            nn.Linear(256, action_dim)
+                        )
+            # self.actor = nn.Sequential(
+            #     nn.Linear(state_dim, 64),
+            #     nn.Tanh(),
+            #     nn.Linear(64, 64),
+            #     nn.Tanh(),
+            #     nn.Linear(64, action_dim)
+            # )
         else:
             self.actor = nn.Sequential(
                             nn.Linear(state_dim, 512),
@@ -95,23 +95,23 @@ class ActorCritic(nn.Module):
 
         
         # critic
-        # self.critic = nn.Sequential(
-        #                 nn.Linear(state_dim, 512),
-        #                 nn.Tanh(),
-        #                 nn.Linear(512, 512),
-        #                 nn.Tanh(),
-        #                 nn.Linear(512, 256),
-        #                 nn.Tanh(),
-        #                 nn.Linear(256, 1)
-        #             )
-
         self.critic = nn.Sequential(
-            nn.Linear(state_dim, 64),
-            nn.Tanh(),
-            nn.Linear(64, 64),
-            nn.Tanh(),
-            nn.Linear(64, 1)
-        )
+                        nn.Linear(state_dim, 512),
+                        nn.Tanh(),
+                        nn.Linear(512, 512),
+                        nn.Tanh(),
+                        nn.Linear(512, 256),
+                        nn.Tanh(),
+                        nn.Linear(256, 1)
+                    )
+
+        # self.critic = nn.Sequential(
+        #     nn.Linear(state_dim, 64),
+        #     nn.Tanh(),
+        #     nn.Linear(64, 64),
+        #     nn.Tanh(),
+        #     nn.Linear(64, 1)
+        # )
                 
     def set_action_std(self, new_action_std):
 
@@ -146,7 +146,7 @@ class ActorCritic(nn.Module):
         action = dist.sample()
         # action = torch.round(torch.clamp(action, min=-0.5, max=10.5)).to(dtype=torch.int64)
         # might be bugged? check later
-        action1, action2 = torch.split(action, 192, dim=1) # 210
+        action1, action2 = torch.split(action, 210, dim=1) # 210
         action = torch.cat((
             torch.round(torch.clamp(10*action1, min=-0.5, max=10.5)),
             torch.clamp(action2, min=0, max=1)
