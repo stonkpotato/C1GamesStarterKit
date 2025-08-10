@@ -66,13 +66,13 @@ class ActorCritic(nn.Module):
         # actor
         if has_continuous_action_space :
             self.actor = nn.Sequential(
-                            nn.Linear(state_dim, 128),
+                            nn.Linear(state_dim, 64),
                             nn.Tanh(),
-                            nn.Linear(128, 128),
+                            nn.Linear(64, 64),
                             nn.Tanh(),
-                            # nn.Linear(128, 64),
+                            nn.Linear(64, 32),
                             nn.Tanh(),
-                            nn.Linear(128, action_dim)
+                            nn.Linear(32, action_dim)
                         )
             # self.actor = nn.Sequential(
             #     nn.Linear(state_dim, 64),
@@ -96,13 +96,13 @@ class ActorCritic(nn.Module):
         
         # critic
         self.critic = nn.Sequential(
-                        nn.Linear(state_dim, 128),
+                        nn.Linear(state_dim, 64),
                         nn.Tanh(),
-                        nn.Linear(128, 128),
+                        nn.Linear(64, 64),
                         nn.Tanh(),
-                        # nn.Linear(128, 64),
+                        nn.Linear(64, 32),
                         nn.Tanh(),
-                        nn.Linear(128, 1)
+                        nn.Linear(32, 1)
                     )
 
         # self.critic = nn.Sequential(
@@ -162,6 +162,7 @@ class ActorCritic(nn.Module):
         if self.has_continuous_action_space:
             action_mean = self.actor(state)
             action_var = self.action_var.expand_as(action_mean)
+            print(action_var)
             cov_mat = torch.diag_embed(action_var).to(device)
             dist = MultivariateNormal(action_mean, cov_mat)
             

@@ -260,7 +260,7 @@ while time_step <= max_training_timesteps:
 
     print("AVERAGE REWARD: {}".format(current_ep_reward / 100 if basic else current_ep_reward / 200))
     
-    if time_step % save_model_freq == 0:
+    if time_step % save_model_freq == 0 and time_step != 0:
         save_directory = directory3 + "PPO_{}.pt".format(time_step)
         ppo_agent.save(save_directory)
     
